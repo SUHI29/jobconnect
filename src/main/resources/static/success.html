@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Success</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f3f4f6; padding: 20px; }
+        .success-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; max-width: 450px; width: 100%; border: 1px solid #e5e7eb; }
+        .icon { font-size: 64px; color: #10b981; margin-bottom: 20px; }
+        h1 { font-size: 24px; color: #111827; margin-bottom: 12px; font-weight: 700; }
+        p { color: #6b7280; font-size: 15px; margin-bottom: 30px; line-height: 1.5; }
+        .btn { display: block; width: 100%; padding: 12px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-bottom: 12px; transition: background 0.2s; }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #f3f4f6; color: #374151; }
+        .btn-secondary:hover { background-color: #e5e7eb; }
+    </style>
+</head>
+<body>
+
+    <div class="success-card">
+        <div class="icon">🎉</div>
+        <h1>Applied Successfully!</h1>
+        <p>Your job application has been submitted to the HR Admin team. You can track your screening and review status .</p>
+        
+        <a href="#" id="trackBtn" class="btn">Track My Applications</a>
+        <a href="#" id="dashBtn" class="btn btn-secondary">Go to Dashboard</a>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('userId');
+            
+            if (userId) {
+                
+                document.getElementById('trackBtn').href = `/applications.html?userId=${userId}`;
+                document.getElementById('dashBtn').href = `/dashboard.html?userId=${userId}`;
+            } else {
+                console.error("User ID missing in success page URL!");
+               
+                document.getElementById('trackBtn').href = "/login.html";
+                document.getElementById('dashBtn').href = "/login.html";
+            }
+        });
+    </script>
+</body>
+</html>

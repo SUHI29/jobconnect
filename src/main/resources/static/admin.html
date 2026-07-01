@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartJob - HR Admin Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f3f4f6; padding: 40px; }
+        h1 { margin-bottom: 25px; color: #111827; }
+        
+        /* அழகான Card Layout */
+        .card-container { display: flex; flex-direction: column; gap: 15px; }
+        .app-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid #10b981; 
+                    display: flex; align-items: center; justify-content: space-between; 
+                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        .details h3 { color: #1f2937; margin-bottom: 5px; }
+        .details p { color: #6b7280; font-size: 14px; }
+        
+        /* Buttons */
+        .btn-act { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600; margin-left: 10px; }
+        .btn-app { background-color: #10b981; }
+        .btn-rej { background-color: #ef4444; }
+        .btn-view { background-color: #3b82f6; padding: 6px 12px; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>HR Admin Console</h1>
+    <button onclick="clearAllApps()" style="background-color: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 25px; display: flex; align-items: center; gap: 8px;">
+        🗑️ Clear All Applications
+    </button>
+    <div id="adminTableBody" class="card-container">
+        <p style="text-align:center;">Loading applications...</p>
+    </div>
+
+    <script>
+        function fetchAdminData() {
+            fetch('/api/users/admin/applications')
+                .then(res => res.json())
+                .then(apps => {
+                    const container = document.getElementById('adminTableBody');
+                    container.innerHTML = ''; 
+                    
+                    apps.forEach(app => {
+                        const skills = (app.skills && app.skills !== "null") ? app.skills : "Not specified";
+                        const qual = (app.qualification && app.qualification !== "null") ? app.qualification : "Not specified";
+
+                        container.innerHTML += `
+                            <div class="app-card">
+                                <div class="details">
+                                    <h3>${app.candidateName}</h3>
+                                    <p><strong>Position:</strong> ${app.jobTitle}</p>
+                                    <p><strong>Status:</strong> ${app.status}</p>
+                                    
+                                    <!-- 🌟 பழைய பட்டனுக்கு பதிலா இங்க நேரடி ரெஸ்யூம் லிங்க் மாத்தியாச்சு பாஸ்! -->
+                                    <a href="/uploads/${app.resumePath}" target="_blank" class="btn-view" style="text-decoration: none; display: inline-block; text-align: center;">View Resume</a>
+                                </div>
+                                <div>
+                                    <button class="btn-act btn-app" onclick="updateStatus(${app.id}, 'Accepted')">Approve</button>
+                                    <button class="btn-act btn-rej" onclick="updateStatus(${app.id}, 'Rejected')">Reject</button>
+                                </div>
+                            </div>`;
+                    });
+                });
+        }
+
+        function updateStatus(appId, statusText) {
+            fetch(`/api/users/admin/applications/${appId}/review?status=${statusText}`, { method: 'POST' })
+            .then(res => {
+                if(res.ok) {
+                    alert('Status Updated!');
+                    fetchAdminData();
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', fetchAdminData);
+
+        function clearAllApps() {
+            if (confirm("Are you sure you want to delete ALL applications? ")) {
+                fetch('http://localhost:8080/api/users/admin/applications/clear-all', {
+                    method: 'DELETE'
+                })
+                .then(res => {
+                    if (res.ok) {
+                        alert("All applications cleared successfully!");
+                        location.reload(); 
+                    } else {
+                        alert("Failed to clear applications.");
+                    }
+                })
+                .catch(err => console.error("Error clearing applications:", err));
+            }
+        }
+    </script>
+</body>
+</html>

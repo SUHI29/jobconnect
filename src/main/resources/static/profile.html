@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartJob - Profile Details & Skills Analysis</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; }
+
+       
+        .sidebar { width: 260px; background-color: #0f172a; color: #94a3b8; display: flex; flex-direction: column; padding: 24px; border-right: 1px solid #1e293b; position: fixed; height: 100vh; }
+        .sidebar-brand { color: #ffffff; font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        .sidebar-brand span { color: #3b82f6; }
+        .nav-list { display: flex; flex-direction: column; gap: 8px; list-style: none; }
+        .nav-item a { display: flex; align-items: center; padding: 12px 16px; color: #94a3b8; text-decoration: none; font-weight: 600; border-radius: 8px; transition: all 0.2s; }
+        .nav-item.active a, .nav-item a:hover { background-color: #1e293b; color: #3b82f6; }
+
+       
+        .logout-container { margin-top: auto; padding-top: 16px; border-top: 1px solid #1e293b; }
+        .btn-logout { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; color: #ef4444; background: #2d1616; border: 1px solid #ef4444; font-weight: 700; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.2s; }
+        .btn-logout:hover { background-color: #ef4444; color: white; }
+
+        
+        .main-content { margin-left: 260px; flex: 1; padding: 40px; max-width: 1100px; }
+        .header-section { margin-bottom: 30px; }
+        .header-section h1 { font-size: 28px; font-weight: 800; color: #0f172a; }
+        .header-section p { color: #64748b; font-size: 15px; margin-top: 4px; }
+
+      
+        .profile-card { background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 35px; }
+        .profile-layout { display: flex; gap: 40px; margin-bottom: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 30px; }
+        .avatar-section { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .avatar-placeholder { width: 100px; height: 100px; background-color: #eff6ff; border: 2px solid #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 36px; color: #3b82f6; font-weight: 700; }
+        
+        .fields-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 14px; font-weight: 600; color: #475569; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .full-width { grid-column: span 2; }
+
+        
+        .chips-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .skill-chip { background-color: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #bfdbfe; }
+        .cert-chip { background-color: #f0fdf4; color: #16a34a; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #bbf7d0; }
+
+        .btn-save { padding: 14px 28px; background-color: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; display: block; margin-left: auto; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
+        .btn-save:hover { background-color: #1d4ed8; }
+    </style>
+</head>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const uId = urlParams.get('userId');
+    if(uId) {
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            if(!link.getAttribute('href').includes('?')) {
+                link.href = link.getAttribute('href').split('?')[0] + '?userId=' + uId;
+            }
+        });
+    }
+</script>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-brand">Job <span>Connect</span></div>
+        <ul class="nav-list">
+            <li class="nav-item"><a href="#" onclick="window.location.href='/dashboard.html?userId='+currentUserId">📊 Dashboard</a></li>
+            <li class="nav-item active"><a href="#">👤 Profile</a></li>
+            <li class="nav-item"><a href="#" onclick="window.location.href='/applications.html?userId='+currentUserId">📁 My Applications</a></li>
+        </ul>
+        
+        <div class="logout-container">
+            <button onclick="logoutUser()" class="btn-logout">
+                🚪 Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header-section">
+            <h1>Profile Matrix</h1>
+            <p>Complete your profile to get better job recommendations.</p>
+        </div>
+
+        <div class="profile-card">
+            <form action="/api/users/update-profile" method="POST">
+                <input type="hidden" id="userIdField" name="userId">
+
+                <div class="profile-layout">
+                    <div class="avatar-section">
+                        <div class="avatar-placeholder" id="avatarInitial">U</div>
+                    </div>
+                    
+                    <div class="fields-grid">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="fullname" name="fullName" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email ID</label>
+                            <input type="email" id="email" readonly style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" id="phoneNumber" name="phoneNumber" placeholder="e.g. +91 98765 43210" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="location" name="location" placeholder="e.g. Chennai, Tamil Nadu" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fields-grid" style="border-top: 1px solid #e2e8f0; padding-top: 25px;">
+                    <div class="form-group full-width">
+                        <label>Education Details</label>
+                        <input type="text" id="education" name="education" placeholder="e.g. B.Tech - Computer Science Engineering, Anna University" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Skills Matrix (Separate fields via Comma ",")</label>
+                        <textarea id="skills" name="skills" rows="2" placeholder="e.g. Python, SQL, Machine Learning, AWS, Git" oninput="renderSkillChips()" required></textarea>
+                        <div class="chips-container" id="skillsChipsArea"></div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Certifications (Separate fields via Comma ",")</label>
+                        <textarea id="certifications" name="certifications" rows="2" placeholder="e.g. AWS Certified Solutions Architect, Google Data Analytics Certificate" oninput="renderCertChips()" required></textarea>
+                        <div class="chips-container" id="certChipsArea"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save">Save Profile & Continue →</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = null;
+
+        function renderSkillChips() {
+            const rawInput = document.getElementById('skills').value;
+            const targetContainer = document.getElementById('skillsChipsArea');
+            targetContainer.innerHTML = '';
+            if(!rawInput.trim()) return;
+            
+            rawInput.split(',').forEach(skill => {
+                if(skill.trim()) {
+                    const chip = document.createElement('span');
+                    chip.className = 'skill-chip';
+                    chip.textContent = skill.trim();
+                    targetContainer.appendChild(chip);
+                }
+            });
+        }
+
+        function renderCertChips() {
+            const rawInput = document.getElementById('certifications').value;
+            const targetContainer = document.getElementById('certChipsArea');
+            targetContainer.innerHTML = '';
+            if(!rawInput.trim()) return;
+
+            rawInput.split(',').forEach(cert => {
+                if(cert.trim()) {
+                    const chip = document.createElement('span');
+                    chip.className = 'cert-chip';
+                    chip.textContent = cert.trim();
+                    targetContainer.appendChild(chip);
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentUserId = urlParams.get('userId');
+
+            if (!currentUserId) {
+                alert("Session Expired! Please Login again.");
+                window.location.href = "/login.html";
+                return;
+            }
+
+            document.getElementById('userIdField').value = currentUserId;
+
+            fetch(`/api/users/${currentUserId}`)
+                .then(response => response.json())
+                .then(user => {
+                    document.getElementById('fullname').value = user.fullname || '';
+                    document.getElementById('email').value = user.email || '';
+                    document.getElementById('phoneNumber').value = user.phoneNumber || '';
+                    document.getElementById('location').value = user.location || '';
+                    document.getElementById('education').value = user.education || '';
+                    document.getElementById('skills').value = user.skills || '';
+                    document.getElementById('certifications').value = user.certifications || '';
+                    
+                    if(user.fullname) {
+                        document.getElementById('avatarInitial').textContent = user.fullname.charAt(0).toUpperCase();
+                    }
+                    
+                    renderSkillChips();
+                    renderCertChips();
+                })
+                .catch(err => {
+                    console.error("Error loading profile configuration parameters:", err);
+                });
+        });
+
+       
+        function logoutUser() {
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            alert("Logged out successfully!");
+            window.location.href = "/login.html"; 
+        }
+    </script>
+</body>
+</html>

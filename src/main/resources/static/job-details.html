@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartJob - Job Details</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; justify-content: center; padding: 40px; }
+        .main-content { max-width: 900px; width: 100%; }
+        
+       
+        .back-link { color: #64748b; text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 20px; transition: color 0.2s; }
+        .back-link:hover { color: #1e293b; }
+
+        
+        .job-header-card, .details-card, .action-bar { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        
+        
+        .job-header-card h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .job-header-card p { color: #2563eb; font-size: 16px; font-weight: 600; }
+        
+       
+        .details-card h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        .details-item { margin-bottom: 12px; font-size: 15px; color: #334155; line-height: 1.6; }
+        .details-item strong { color: #0f172a; display: inline-block; width: 160px; }
+        
+        
+        .action-info { color: #64748b; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        .file-upload-box { margin: 20px 0; padding: 25px; border: 2px dashed #cbd5e1; border-radius: 12px; text-align: center; background: #f8fafc; transition: border-color 0.2s; }
+        .file-upload-box:hover { border-color: #94a3b8; }
+        .file-upload-box label { font-weight: 600; color: #334155; font-size: 15px; cursor: pointer; }
+        .file-upload-box input[type="file"] { margin-top: 12px; font-size: 14px; color: #475569; }
+        
+       
+        .btn-submit-app { padding: 14px 32px; background: #2563eb; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 16px; transition: background 0.2s, transform 0.1s; width: 100%; max-width: 250px; }
+        .btn-submit-app:hover { background: #1d4ed8; }
+        .btn-submit-app:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <a href="#" id="topBackBtn" class="back-link">← Back to Dashboard</a>
+        
+        <div class="job-header-card">
+            <h1 id="jobTitle">Job Title Loading...</h1>
+            <p id="companyName">Company Name Loading...</p>
+        </div>
+
+        <div class="details-card">
+            <h3>Job Specifications & Requirements</h3>
+            <div id="jobDesc">
+                <p style="color: #94a3b8;">Loading detailed description from server bank...</p>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <div class="action-info">
+                📌 <strong>Note:</strong> By clicking apply, your registered profile skills, qualification, and this uploaded resume file will be instantly pushed to the HR portal for review.
+            </div>
+            
+            <form action="/api/users/apply" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="userId" id="formUserId">
+                <input type="hidden" name="jobTitle" id="formJobTitle">
+                <input type="hidden" name="company" id="formCompany">
+                <input type="hidden" name="matchPercent" id="formMatchPercent">
+<input type="hidden" name="salary" id="formSalary" value="Best in Industry">
+    <input type="hidden" name="experience" id="formExperience" value="Fresher">
+                <div class="file-upload-box">
+                    <label for="resumeFile">📄 Upload your Resume (Only PDF / DOC format):</label><br>
+                    <input type="file" id="resumeFile" name="resumeFile" accept=".pdf,.doc,.docx" required>
+                </div>
+                
+                <button type="submit" class="btn-submit-app">Apply For This Job</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+           
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('userId');
+            const encodedTitle = urlParams.get('jobTitle');
+            const encodedCompany = urlParams.get('company');
+            const matchPercent = urlParams.get('match') || '0';
+
+           
+            const decodedTitle = decodeURIComponent(encodedTitle || 'Job Title');
+            const decodedCompany = decodeURIComponent(encodedCompany || 'Company');
+
+            
+            document.getElementById('jobTitle').textContent = decodedTitle;
+            document.getElementById('companyName').textContent = decodedCompany;
+
+           
+            document.getElementById('topBackBtn').href = `/dashboard.html?userId=${userId}`;
+            document.getElementById('formUserId').value = userId;
+            document.getElementById('formJobTitle').value = decodedTitle;
+            document.getElementById('formCompany').value = decodedCompany;
+            document.getElementById('formMatchPercent').value = matchPercent;
+
+            
+            if (userId && encodedTitle) {
+                fetch(`/api/users/${userId}/recommendations`)
+                    .then(res => res.json())
+                    .then(jobs => {
+                       
+                        const targetJob = jobs.find(j => j.title.trim().toLowerCase() === decodedTitle.trim().toLowerCase());
+                        
+                        if (targetJob) {
+                           
+                            let detailedTemplate = `
+                                <div class="details-item"><strong>🎯 Role Summary:</strong> ${targetJob.description || 'Build enterprise-grade systems.'}</div>
+                                <div class="details-item"><strong>🛠️ Required Skills:</strong> ${targetJob.reqSkills || 'N/A'}</div>
+                                <div class="details-item"><strong>🎓 Qualification:</strong> ${targetJob.qualification || 'Any Graduate'}</div>
+                                <div class="details-item"><strong>💼 Experience Needed:</strong> ${targetJob.experience || 'Fresher'}</div>
+                                <div class="details-item"><strong>💰 Offered Salary:</strong> ${targetJob.salary || 'Not Disclosed'}</div>
+                            `;
+                            
+                            document.getElementById('jobDesc').innerHTML = detailedTemplate;
+                            document.getElementById('formMatchPercent').value = targetJob.matchPercent;
+                        } else {
+                            
+                            document.getElementById('jobDesc').innerHTML = `
+                                <div class="details-item"><strong>🎯 Role Summary:</strong> Technical engineering execution for ${decodedTitle}.</div>
+                                <div class="details-item"><strong>🛠️ Required Skills:</strong> Software Development Fundamentals</div>
+                                <div class="details-item"><strong>🎓 Qualification:</strong> Technical Graduate</div>
+                                <div class="details-item"><strong>💼 Experience Needed:</strong> Entry Level</div>
+                                <div class="details-item"><strong>💰 Offered Salary:</strong> As per company norms</div>
+                            `;
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error fetching live job specs:", err);
+                        document.getElementById('jobDesc').textContent = "Failed to synchronize detailed requirements from server bank.";
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
