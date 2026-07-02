@@ -11,6 +11,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
        
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:C:/smartjob_springboot/smartjob/src/main/resources/static/uploads/");
+           .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
     }
 }

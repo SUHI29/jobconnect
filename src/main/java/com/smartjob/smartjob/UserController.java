@@ -245,7 +245,7 @@ if (resumeFile != null && !resumeFile.isEmpty()) {
     fileName = System.currentTimeMillis() + "_" + resumeFile.getOriginalFilename();
     
    
-    String uploadDir = "C:/smartjob_springboot/smartjob/src/main/resources/static/uploads/";
+String uploadDir = System.getProperty("user.dir") + "/uploads/";
     
     File dir = new File(uploadDir);
     if (!dir.exists()) {
