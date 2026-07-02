@@ -79,7 +79,7 @@
 
         function clearAllApps() {
             if (confirm("Are you sure you want to delete ALL applications? ")) {
-                fetch('http://localhost:8080/api/users/admin/applications/clear-all', {
+fetch('/api/users/admin/applications/clear-all', {
                     method: 'DELETE'
                 })
                 .then(res => {

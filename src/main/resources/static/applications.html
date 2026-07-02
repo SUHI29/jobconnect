@@ -81,7 +81,7 @@
                 return;
             }
 
-            fetch(`http://localhost:8080/api/users/${userId}/applications`)
+fetch(`/api/users/${userId}/applications`)
                 .then(res => res.json())
                 .then(apps => {
                     // Filter Saved & Clear Loading
